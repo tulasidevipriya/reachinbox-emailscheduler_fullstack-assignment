@@ -1,0 +1,11 @@
+reachinbox-email-scheduler/
+├── docker-compose.yml       # Starts PostgreSQL & Redis
+├── README.md                # Your documentation (Use the template below)
+├── .gitignore               # Critical: Add .env and node_modules here
+├── backend/
+│   ├── prisma/              # Database schema & migrations
+│   ├── src/                 # Express, BullMQ, & Worker logic
+│   └── .env                 # Local variables (DO NOT PUSH TO GITHUB)
+└── frontend/
+    ├── src/                 # Next.js App & UI components
+    └── .env.local           # Google OAuth secrets (DO NOT PUSH TO GITHUB)
