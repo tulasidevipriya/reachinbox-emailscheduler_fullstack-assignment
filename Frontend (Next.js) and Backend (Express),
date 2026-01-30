@@ -1,0 +1,61 @@
+import cors from 'cors';
+
+const app = express();
+
+// Allow the frontend to talk to the backend
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
+app.use(express.json());
+
+
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api
+
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Something went wrong');
+  }
+
+
+
+import { apiRequest } from '../lib/api';
+
+const handleSchedule = async () => {
+  try {
+    const payload = {
+      leads,        // Array of emails from CSV
+      subject: 'Hello from ReachInbox!',
+      body: 'This is a scheduled email.',
+      startTime: new Date().toISOString(),
+      delayInSeconds: 10,
+      userId: 'user_123' 
+    };
+
+    const data = await apiRequest('/emails/schedule', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    console.log('Success:', data.message);
+    // Add a toast notification here
+  } catch (err) {
+    console.error('Failed to schedule:', err);
+  }
+};
+  return response.json();
+};
