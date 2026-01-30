@@ -1,0 +1,86 @@
+// frontend/src/components/ComposeEmail.tsx
+import React, { useState } from 'react';
+import Papa from 'papaparse';
+import { Upload, Send, Clock } from 'lucide-react';
+
+export default function ComposeEmail() {
+  const [leads, setLeads] = useState<string[]>([]);
+  const [formData, setFormData] = useState({
+    subject: '',
+    body: '',
+    startTime: '',
+    delay: 2, // default 2 seconds
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      Papa.parse(file, {
+        complete: (results) => {
+          const emails = results.data.flat().filter((email: any) => 
+            typeof email === 'string' && email.includes('@')
+          ) as string[];
+          setLeads(emails);
+        },
+      });
+    }
+  };
+
+  const handleSchedule = async () => {
+    const response = await fetch('http://localhost:5000/api/emails/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...formData, leads }),
+    });
+    if (response.ok) alert('Emails Scheduled!');
+  };
+
+  return (
+    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+      <h2 className="text-2xl font-bold mb-6">Compose New Outreach</h2>
+      
+      <div className="space-y-4">
+        <input 
+          type="text" placeholder="Email Subject" 
+          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          onChange={(e) => setFormData({...formData, subject: e.target.value})}
+        />
+        
+        <textarea 
+          placeholder="Email Body..." rows={5}
+          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          onChange={(e) => setFormData({...formData, body: e.target.value})}
+        />
+
+        <div className="flex gap-4 items-end">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-gray-600">Upload Leads (CSV)</label>
+            <div className="mt-1 relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition">
+              <input type="file" accept=".csv" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+              <div className="flex flex-col items-center">
+                <Upload className="text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">{leads.length > 0 ? `${leads.length} leads detected` : 'Click to upload CSV'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-1/3">
+            <label className="text-sm font-medium text-gray-600">Start Time</label>
+            <input 
+              type="datetime-local" 
+              className="mt-1 w-full p-3 border rounded-lg"
+              onChange={(e) => setFormData({...formData, startTime: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <button 
+          onClick={handleSchedule}
+          className="w-full bg-blue-600 text-white font-bold py-4 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+        >
+          <Clock size={20} /> Schedule Campaign
+        </button>
+      </div>
+    </div>
+  );
+}
